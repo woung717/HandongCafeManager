@@ -28,7 +28,7 @@ public class Customer {
         System.out.println("Gender(M or F) : ");
         String gender = (new Scanner(System.in)).nextLine();
 
-        String query = "INSERT INTO USER (ID, PASSWORD, UNAME, BIRTH, SEX, TYPE) VALUES (?, ?, ?, ?, ?, ?)";
+        String query = "INSERT INTO USERS (ID, PASSWORD, UNAME, BIRTH, SEX, TYPE) VALUES (?, ?, ?, ?, ?, ?)";
 
         PreparedStatement pstmt;
         try {
@@ -41,6 +41,8 @@ public class Customer {
             pstmt.setString(6, "C");
 
             pstmt.executeUpdate();
+
+            pstmt.close();
         } catch(Exception e) {
             System.out.println("Fail to create new user.");
 
@@ -56,7 +58,7 @@ public class Customer {
         System.out.println("Input Password : ");
         String password = (new Scanner(System.in)).nextLine();
 
-        String query = "SELECT * FROM USER WHERE ID=? AND PASSWORD=?";
+        String query = "SELECT * FROM USERS WHERE ID=? AND PASSWORD=?";
 
         PreparedStatement pstmt;
         try {
@@ -71,11 +73,39 @@ public class Customer {
             } else {
                 System.out.println("There is no such user.");
             }
+
+            pstmt.close();
         } catch(Exception e) {
             System.out.println("Fail to login.");
         }
 
         return null;
+    }
+
+    public String[] getPostList() {
+        String[] posts = null;
+
+        String query = "SELECT * FROM POST ORDER BY POST_DATE ASC";
+
+        PreparedStatement pstmt;
+        try {
+            pstmt = this.conn.prepareStatement(query);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            int i = 0;
+            posts = new String[rs.getRow()];
+            while(rs.next()) {
+                posts[i++] = rs.getString("TITLE") + " (" + rs.getString("CAFE") + ")" + "\n" +
+                        rs.getString("CONTENT") + " / " + rs.getString("POST_DATE");
+            }
+
+            pstmt.close();
+        } catch(Exception e) {
+            System.out.println("Fail to get post list.");
+        }
+
+        return posts;
     }
 
     public String[] getCafeList() {
@@ -95,8 +125,10 @@ public class Customer {
                 cafes[i++] = rs.getString("CNAME") + " - " + rs.getString("LOCATION") +
                         "(" + rs.getString("PHONE") + ")";
             }
+
+            pstmt.close();
         } catch(Exception e) {
-            System.out.println("Fail to login.");
+            System.out.println("Fail to get cafe list.");
         }
 
         return cafes;
@@ -119,6 +151,8 @@ public class Customer {
             while(rs.next()) {
                 coupons[i++] = rs.getString("CAFE") + " - " + rs.getInt("CNUMBER");
             }
+
+            pstmt.close();
         } catch(Exception e) {
             System.out.println("Fail to get coupon list.");
         }
@@ -145,6 +179,8 @@ public class Customer {
                         rs.getInt("CALORIE") + " kcal) - " + rs.getInt("PRICE") + " won" +
                         ((rs.getInt("STOCK") < 1) ? " Sold Out" : "");
             }
+
+            pstmt.close();
         } catch(Exception e) {
             System.out.println("Fail to get menu list.");
         }
@@ -175,6 +211,8 @@ public class Customer {
                         ", " + rs.getString("SIZE") +") - " + rs.getInt("PRICE") + " won" +
                         ((rs.getInt("STOCK") < 1) ? " Sold Out" : "");
             }
+
+            pstmt.close();
         } catch(Exception e) {
             System.out.println("Fail to get menu list.");
         }
@@ -204,6 +242,8 @@ public class Customer {
                         rs.getInt("CALORIE") + " kcal" + ", " + rs.getString("SIZE") +") - " +
                         rs.getInt("PRICE") + " won" + ((rs.getInt("STOCK") < 1) ? " Sold Out" : "");
             }
+
+            pstmt.close();
         } catch(Exception e) {
             System.out.println("Fail to get menu list.");
         }
@@ -232,6 +272,9 @@ public class Customer {
                         rs.getInt("CALORIE") + " kcal) - " + rs.getInt("PRICE") + " won" +
                         ((rs.getInt("STOCK") < 1) ? " Sold Out" : "");
             }
+
+
+            pstmt.close();
         } catch(Exception e) {
             System.out.println("Fail to get menu list.");
         }
@@ -257,6 +300,8 @@ public class Customer {
             while(rs.next()) {
                 ingredients[i++] = rs.getString("NAME");
             }
+
+            pstmt.close();
         } catch(Exception e) {
             System.out.println("Fail to get ingredient list.");
         }

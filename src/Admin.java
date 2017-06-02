@@ -15,37 +15,67 @@ public class Admin {
     }
 
     public boolean addNewManager() {
-            System.out.println("Input ID : ");
-            String ID = (new Scanner(System.in)).nextLine();
-            System.out.println("Input Password : ");
-            String password = (new Scanner(System.in)).nextLine();
-            System.out.println("Name : ");
-            String name = (new Scanner(System.in)).nextLine();
-            System.out.println("Birthday(YYYY-MM-DD) : ");
-            String birthday = (new Scanner(System.in)).nextLine();
-            System.out.println("Gender(M or F) : ");
-            String gender = (new Scanner(System.in)).nextLine();
+        System.out.println("Input ID : ");
+        String ID = (new Scanner(System.in)).nextLine();
+        System.out.println("Input Password : ");
+        String password = (new Scanner(System.in)).nextLine();
+        System.out.println("Name : ");
+        String name = (new Scanner(System.in)).nextLine();
+        System.out.println("Birthday(YYYY-MM-DD) : ");
+        String birthday = (new Scanner(System.in)).nextLine();
+        System.out.println("Gender(M or F) : ");
+        String gender = (new Scanner(System.in)).nextLine();
+
+        System.out.println("Cafe Name : ");
+        String cafe = (new Scanner(System.in)).nextLine();
+        System.out.println("Phone : ");
+        String phone = (new Scanner(System.in)).nextLine();
+        System.out.println("Location : ");
+        String location = (new Scanner(System.in)).nextLine();
+
+        PreparedStatement pstmt = null;
+
+        try {
+            pstmt = this.conn.prepareStatement("START TRANSACTION");
+            pstmt.execute();
 
             String query = "INSERT INTO USERS (ID, PASSWORD, UNAME, BIRTH, SEX, TYPE) VALUES (?, ?, ?, ?, ?, ?)";
 
-            PreparedStatement pstmt;
+            pstmt = this.conn.prepareStatement(query);
+            pstmt.setString(1, ID);
+            pstmt.setString(2, password);
+            pstmt.setString(3, name);
+            pstmt.setString(4, birthday);
+            pstmt.setString(5, gender);
+            pstmt.setString(6, "M");
+
+            pstmt.executeUpdate();
+
+            query = "INSERT INTO CAFES (CNAME, PHONE, LOCATION, MANAGER) VALUES (?, ?, ?, ?)";
+
+            pstmt = this.conn.prepareStatement(query);
+            pstmt.setString(1, cafe);
+            pstmt.setString(2, phone);
+            pstmt.setString(3, location);
+            pstmt.setString(4, ID);
+
+            pstmt.executeUpdate();
+
+            pstmt = this.conn.prepareStatement("COMMIT");
+            pstmt.execute();
+
+            pstmt.close();
+        } catch(Exception e) {
+            System.out.println("Fail to create new user.");
+
             try {
-                pstmt = this.conn.prepareStatement(query);
-                pstmt.setString(1, ID);
-                pstmt.setString(2, password);
-                pstmt.setString(3, name);
-                pstmt.setString(4, birthday);
-                pstmt.setString(5, gender);
-                pstmt.setString(6, "M");
+                pstmt = this.conn.prepareStatement("ROLLBACK");
+                pstmt.execute();
+            } catch (Exception e1) {;}
+            return false;
+        }
 
-                pstmt.executeUpdate();
-            } catch(Exception e) {
-                System.out.println("Fail to create new user.");
-
-                return false;
-            }
-
-            return true;
+        return true;
     }
 
     public boolean removeUser() {
@@ -60,6 +90,7 @@ public class Admin {
             pstmt.setString(1, ID);
 
             pstmt.executeUpdate();
+            pstmt.close();
         } catch(Exception e) {
             System.out.println("Fail to remove the user.");
 
@@ -88,6 +119,8 @@ public class Admin {
                         rs.getString("SEX") + "/" + (rs.getString("TYPE") == "M" ? "Manager" :
                         (rs.getString("TYPE") == "C") ? "Customer" : "Administrator");
             }
+
+            pstmt.close();
         } catch(Exception e) {
             System.out.println("Fail to get coupon list.");
         }
