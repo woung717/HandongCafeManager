@@ -1,6 +1,9 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.util.Scanner;
 
 public class Main {
     static final String SERVER_ADDR = "peace.handong.edu";
@@ -12,6 +15,11 @@ public class Main {
         Connection conn = initDatabase(SERVER_ADDR, DB_ID, DB_PASSWORD);
 
         Customer customer = new Customer(conn);
+        int s = (new Scanner(System.in)).nextInt();
+    }
+
+    private static int printMainMenu() {
+        return 0;
     }
 
     private static Connection initDatabase(String addr, String id, String password) {
