@@ -8,6 +8,7 @@ import java.util.Scanner;
  */
 public class Admin {
     private Connection conn;
+    private Manager manager;
 
     public Admin(Connection conn) {
         this.conn = conn;
@@ -92,5 +93,13 @@ public class Admin {
         }
 
         return users;
+    }
+
+    public Manager getManager() {
+        return manager;
+    }
+
+    public void setManager(Manager manager) {
+        this.manager = manager;
     }
 }
