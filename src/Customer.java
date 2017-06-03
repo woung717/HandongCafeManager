@@ -270,7 +270,7 @@ public class Customer {
         return ingredients;
     }
     
-    private int getRowFromRS(ResultSet rs) {
+    public static int getRowFromRS(ResultSet rs) {
         int row = 0;
         
         try {

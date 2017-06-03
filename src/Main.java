@@ -13,6 +13,7 @@ public class Main {
         conn = initDatabase(SERVER_ADDR, DB_ID, DB_PASSWORD);
 
         Customer customer = new Customer(conn);
+        Admin admin = new Admin(conn);
 
         do {
             customer.setID((door() == 1) ? login() : register());
@@ -20,135 +21,190 @@ public class Main {
 
         boolean mainLoop = true;
         while(mainLoop) {
-            switch (printMainMenu()) {
-                case 1: {
-                    String[] cafes = customer.getCafeList();
+            if(getUserType(customer.getID()).equals("C")) {
+                switch (printCustomterMainMenu()) {
+                    case 1: {
+                        String[] cafes = customer.getCafeList();
 
-                    System.out.println("=============================");
-                    for(String cafe : cafes) {
-                        System.out.println(cafe);
-                    }
-                    System.out.println("=============================");
-                    System.out.print("Choose a cafe : ");
-                    customer.setCafe((new Scanner(System.in)).nextLine());
-
-                    boolean cafeLoop = true;
-                    while(cafeLoop) {
-
-                        System.out.println("");
-                        System.out.println(customer.getCafe());
-                        switch (printCafeMenu()) {
-                            case 1: {
-                                String[] menus = customer.getAllMenu();
-
-                                System.out.println("=============================");
-                                for(String menu : menus) {
-                                    System.out.println(menu);
-                                }
-                                System.out.println("=============================");
-
-                                break;
-                            }
-                            case 2: {
-                                String[] menus = customer.getAllBeverageByCafe();
-
-                                System.out.println("=============================");
-                                for(String menu : menus) {
-                                    System.out.println(menu);
-                                }
-                                System.out.println("=============================");
-
-                                break;
-                            }
-                            case 3: {
-                                System.out.print("Hot or Cool, or Else? (H or C) : ");
-                                String[] menus = customer.getAllBeverageByTemperature((new Scanner(System.in)).nextLine());
-
-                                System.out.println("=============================");
-                                for(String menu : menus) {
-                                    System.out.println(menu);
-                                }
-                                System.out.println("=============================");
-
-                                break;
-                            }
-                            case 4: {
-                                System.out.print("Which beverage do you want? : ");
-
-                                String[] ingredients = customer.getIngredients((new Scanner(System.in)).nextLine());
-
-                                System.out.println("=============================");
-                                for(String ingredient : ingredients) {
-                                    System.out.println(ingredient);
-                                }
-                                System.out.println("=============================");
-
-                                break;
-                            }
-                            case 5: {
-                                System.out.print("What ingredient do you want to exclude? : ");
-
-                                String[] menus = customer.getMenuWithNonCertainIngredient((new Scanner(System.in)).nextLine());
-
-                                System.out.println("=============================");
-                                for(String menu : menus) {
-                                    System.out.println(menu);
-                                }
-                                System.out.println("=============================");
-
-                                break;
-                            }
-                            case 6: {
-                                cafeLoop = false;
-                                break;
-                            }
-                            default:
-                                break;
+                        System.out.println("=============================");
+                        for (String cafe : cafes) {
+                            System.out.println(cafe);
                         }
-                    }
-
-                    break;
-                }
-                case 2: {
-                    String[] posts = customer.getPostTitleList();
-
-                    System.out.println("=============================");
-                    for(String post : posts) {
-                        System.out.println(post);
-                    }
-                    System.out.println("=============================");
-                    System.out.print("Choose a post number to view : ");
-                    int postNumber = (new Scanner(System.in)).nextInt();
-
-                    String post;
-                    if((post = customer.getPost(postNumber)) != null) {
                         System.out.println("=============================");
-                        System.out.println(post);
+                        System.out.print("Choose a cafe : ");
+                        customer.setCafe((new Scanner(System.in)).nextLine());
+
+                        boolean cafeLoop = true;
+                        while (cafeLoop) {
+
+                            System.out.println("");
+                            System.out.println(customer.getCafe());
+                            switch (printCafeMenu()) {
+                                case 1: {
+                                    String[] menus = customer.getAllMenu();
+
+                                    System.out.println("=============================");
+                                    for (String menu : menus) {
+                                        System.out.println(menu);
+                                    }
+                                    System.out.println("=============================");
+                                    try { System.in.read(); } catch (Exception e) { ; }
+
+                                    break;
+                                }
+                                case 2: {
+                                    String[] menus = customer.getAllBeverageByCafe();
+
+                                    System.out.println("=============================");
+                                    for (String menu : menus) {
+                                        System.out.println(menu);
+                                    }
+                                    System.out.println("=============================");
+                                    try { System.in.read(); } catch (Exception e) { ; }
+
+                                    break;
+                                }
+                                case 3: {
+                                    System.out.print("Hot or Cool? (H or C) : ");
+                                    String[] menus = customer.getAllBeverageByTemperature((new Scanner(System.in)).nextLine());
+
+                                    System.out.println("=============================");
+                                    for (String menu : menus) {
+                                        System.out.println(menu);
+                                    }
+                                    System.out.println("=============================");
+                                    try { System.in.read(); } catch (Exception e) { ; }
+
+                                    break;
+                                }
+                                case 4: {
+                                    System.out.print("Which beverage do you want? : ");
+
+                                    String[] ingredients = customer.getIngredients((new Scanner(System.in)).nextLine());
+
+                                    System.out.println("=============================");
+                                    for (String ingredient : ingredients) {
+                                        System.out.println(ingredient);
+                                    }
+                                    System.out.println("=============================");
+                                    try { System.in.read(); } catch (Exception e) { ; }
+
+                                    break;
+                                }
+                                case 5: {
+                                    System.out.print("What ingredient do you want to exclude? : ");
+
+                                    String[] menus = customer.getMenuWithNonCertainIngredient((new Scanner(System.in)).nextLine());
+
+                                    System.out.println("=============================");
+                                    for (String menu : menus) {
+                                        System.out.println(menu);
+                                    }
+                                    System.out.println("=============================");
+                                    try { System.in.read(); } catch (Exception e) { ; }
+
+                                    break;
+                                }
+                                case 6: {
+                                    cafeLoop = false;
+                                    break;
+                                }
+                                default:
+                                    break;
+                            }
+                        }
+
+                        break;
+                    }
+                    case 2: {
+                        String[] posts = customer.getPostTitleList();
+
                         System.out.println("=============================");
-                        try {System.in.read();} catch (Exception e) {;}
-                    } else {
-                        System.out.print("No such post exist.");
+                        for (String post : posts) {
+                            System.out.println(post);
+                        }
+                        System.out.println("=============================");
+                        System.out.print("Choose a post number to view : ");
+                        int postNumber = (new Scanner(System.in)).nextInt();
+
+                        String post;
+                        if ((post = customer.getPost(postNumber)) != null) {
+                            System.out.println("=============================");
+                            System.out.println(post);
+                            System.out.println("=============================");
+                            try { System.in.read(); } catch (Exception e) { ; }
+                        } else {
+                            System.out.print("No such post exist.");
+                        }
+
+                        break;
                     }
+                    case 3: {
+                        String[] coupons = customer.getCouponList();
 
-                    break;
-                }
-                case 3: {
-                    String[] coupons = customer.getCouponList();
+                        System.out.println("=============================");
+                        for (String coupon : coupons) {
+                            System.out.println(coupon);
+                        }
+                        System.out.println("=============================");
+                        try { System.in.read(); } catch (Exception e) { ; }
 
-                    System.out.println("=============================");
-                    for(String coupon : coupons) {
-                        System.out.println(coupon);
+                        break;
                     }
-                    System.out.println("=============================");
+                    case 4: {
+                        mainLoop = false;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } else if(getUserType(customer.getID()).equals("M")) {
+                // Manager menu
+            } else if(getUserType(customer.getID()).equals("A")) {
+                switch (printAdminMainMenu()) {
+                    case 1: {
+                        String[] cafes = admin.showAllCafe();
 
-                    break;
+                        System.out.println("=============================");
+                        for (String cafe : cafes) {
+                            System.out.println(cafe);
+                        }
+                        System.out.println("=============================");
+                        try { System.in.read(); } catch (Exception e) { ; }
+
+                        break;
+                    }
+                    case 2: {
+                        String[] users = admin.showAllUser();
+
+                        System.out.println("=============================");
+                        for (String user : users) {
+                            System.out.println(user);
+                        }
+                        System.out.println("=============================");
+                        try { System.in.read(); } catch (Exception e) { ; }
+
+                        break;
+                    }
+                    case 3: {
+                        admin.addNewManager();
+                        break;
+                    }
+                    case 4: {
+                        admin.removeUser();
+                        break;
+                    }
+                    case 5: {
+                        admin.setManagerOnCafe();
+                        break;
+                    }
+                    case 6: {
+                        mainLoop = false;
+                        break;
+                    }
+                    default:
+                        break;
                 }
-                case 4: {
-                    mainLoop = false;
-                    break;
-                }
-                default:
-                    break;
             }
         }
     }
@@ -165,7 +221,22 @@ public class Main {
         return (new Scanner(System.in)).nextInt();
     }
 
-    public static int printMainMenu() {
+    public static int printAdminMainMenu() {
+        System.out.println("");
+        System.out.println("=============================");
+        System.out.println("1. View all cafe");
+        System.out.println("2. View all user");
+        System.out.println("3. Add manager(with cafe)");
+        System.out.println("4. Remove user");
+        System.out.println("5. Set manager on cafe");
+        System.out.println("6. Quit");
+        System.out.println("=============================");
+        System.out.print("Choose a menu : ");
+
+        return (new Scanner(System.in)).nextInt();
+    }
+
+    public static int printCustomterMainMenu() {
         System.out.println("");
         System.out.println("=============================");
         System.out.println("1. Select a cafe");
@@ -271,6 +342,30 @@ public class Main {
                 pstmt.close();
 
                 return ID;
+            } else {
+                System.out.println("There is no such user.");
+            }
+            pstmt.close();
+        } catch(SQLException e) {
+            System.out.println(e);
+            System.out.println("Fail to login.");
+        }
+
+        return null;
+    }
+
+    public static String getUserType(String ID) {
+        String query = "SELECT TYPE FROM USERS WHERE ID=?";
+
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, ID);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            if(rs.next()) {
+                return rs.getString("TYPE");
             } else {
                 System.out.println("There is no such user.");
             }

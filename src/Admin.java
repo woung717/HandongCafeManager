@@ -1,6 +1,7 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 /**
@@ -78,6 +79,46 @@ public class Admin {
         return true;
     }
 
+    public boolean setManagerOnCafe() {
+        System.out.println("Cafe Name : ");
+        String cafe = (new Scanner(System.in)).nextLine();
+        System.out.println("Input ID : ");
+        String ID = (new Scanner(System.in)).nextLine();
+
+        String query = null;
+
+        try {
+            PreparedStatement pstmt = this.conn.prepareStatement("START TRANSACTION");
+            pstmt.execute();
+
+            query = "SELECT TYPE FROM USERS WHERE ID=?";
+            pstmt = this.conn.prepareStatement(query);
+
+            pstmt.setString(1, ID);
+
+            ResultSet rs = pstmt.executeQuery();
+            if(rs.next() && rs.getString("TYPE").equals("M")) {
+                query = "UPDATE CAFES SET MANAGER=? WHERE CNAME=?";
+                pstmt = this.conn.prepareStatement(query);
+
+                pstmt.setString(1, ID);
+                pstmt.setString(2, cafe);
+
+                pstmt.executeUpdate();
+            }
+        } catch(SQLException e) {
+            System.out.println("Wrong Input");
+            try {
+                PreparedStatement pstmt = this.conn.prepareStatement("ROLLBACK");
+                pstmt.execute();
+            } catch (SQLException e1) { ; }
+
+            return false;
+        }
+
+        return true;
+    }
+
     public boolean removeUser() {
         System.out.println("Input ID : ");
         String ID = (new Scanner(System.in)).nextLine();
@@ -100,6 +141,32 @@ public class Admin {
         return true;
     }
 
+    public String[] showAllCafe() {
+        String[] cafes = null;
+
+        String query = "SELECT * FROM CAFES";
+
+        PreparedStatement pstmt;
+        try {
+            pstmt = this.conn.prepareStatement(query);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            int i = 0;
+            cafes = new String[Customer.getRowFromRS(rs)];
+            while(rs.next()) {
+                cafes[i++] = rs.getString("CNAME") + "/" + rs.getString("PHONE") + "/" +
+                        rs.getString("LOCATION") + "/" + rs.getString("MANAGER");
+            }
+
+            pstmt.close();
+        } catch (SQLException e) {
+            System.out.println("Fail to get cafe list.");
+        }
+
+        return cafes;
+    }
+
     public String[] showAllUser() {
         String[] users = null;
 
@@ -112,17 +179,17 @@ public class Admin {
             ResultSet rs = pstmt.executeQuery();
 
             int i = 0;
-            users = new String[rs.getRow()];
+            users = new String[Customer.getRowFromRS(rs)];
             while(rs.next()) {
                 users[i++] = rs.getString("ID") + "/" + rs.getString("PASSWORD") + "/" +
                         rs.getString("UNAME") + "/" + rs.getString("BIRTH") + "/" +
-                        rs.getString("SEX") + "/" + (rs.getString("TYPE") == "M" ? "Manager" :
-                        (rs.getString("TYPE") == "C") ? "Customer" : "Administrator");
+                        rs.getString("SEX") + "/" + (rs.getString("TYPE").equals("M") ? "Manager" :
+                        (rs.getString("TYPE").equals("C")) ? "Customer" : "Administrator");
             }
 
             pstmt.close();
         } catch(Exception e) {
-            System.out.println("Fail to get coupon list.");
+            System.out.println("Fail to get user list.");
         }
 
         return users;
