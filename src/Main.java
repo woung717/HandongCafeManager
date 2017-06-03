@@ -1,5 +1,3 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.sql.*;
 import java.util.Scanner;
 
@@ -15,14 +13,186 @@ public class Main {
         conn = initDatabase(SERVER_ADDR, DB_ID, DB_PASSWORD);
 
         Customer customer = new Customer(conn);
-        int s = (new Scanner(System.in)).nextInt();
+
+        do {
+            customer.setID((door() == 1) ? login() : register());
+        } while(customer.getID() == null);
+
+        boolean mainLoop = true;
+        while(mainLoop) {
+            switch (printMainMenu()) {
+                case 1: {
+                    String[] cafes = customer.getCafeList();
+
+                    System.out.println("=============================");
+                    for(String cafe : cafes) {
+                        System.out.println(cafe);
+                    }
+                    System.out.println("=============================");
+                    System.out.print("Choose a cafe : ");
+                    customer.setCafe((new Scanner(System.in)).nextLine());
+
+                    boolean cafeLoop = true;
+                    while(cafeLoop) {
+
+                        System.out.println("");
+                        System.out.println(customer.getCafe());
+                        switch (printCafeMenu()) {
+                            case 1: {
+                                String[] menus = customer.getAllMenu();
+
+                                System.out.println("=============================");
+                                for(String menu : menus) {
+                                    System.out.println(menu);
+                                }
+                                System.out.println("=============================");
+
+                                break;
+                            }
+                            case 2: {
+                                String[] menus = customer.getAllBeverageByCafe();
+
+                                System.out.println("=============================");
+                                for(String menu : menus) {
+                                    System.out.println(menu);
+                                }
+                                System.out.println("=============================");
+
+                                break;
+                            }
+                            case 3: {
+                                System.out.print("Hot or Cool, or Else? (H or C) : ");
+                                String[] menus = customer.getAllBeverageByTemperature((new Scanner(System.in)).nextLine());
+
+                                System.out.println("=============================");
+                                for(String menu : menus) {
+                                    System.out.println(menu);
+                                }
+                                System.out.println("=============================");
+
+                                break;
+                            }
+                            case 4: {
+                                System.out.print("Which beverage do you want? : ");
+
+                                String[] ingredients = customer.getIngredients((new Scanner(System.in)).nextLine());
+
+                                System.out.println("=============================");
+                                for(String ingredient : ingredients) {
+                                    System.out.println(ingredient);
+                                }
+                                System.out.println("=============================");
+
+                                break;
+                            }
+                            case 5: {
+                                System.out.print("What ingredient do you want to exclude? : ");
+
+                                String[] menus = customer.getMenuWithNonCertainIngredient((new Scanner(System.in)).nextLine());
+
+                                System.out.println("=============================");
+                                for(String menu : menus) {
+                                    System.out.println(menu);
+                                }
+                                System.out.println("=============================");
+
+                                break;
+                            }
+                            case 6: {
+                                cafeLoop = false;
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+                    }
+
+                    break;
+                }
+                case 2: {
+                    String[] posts = customer.getPostTitleList();
+
+                    System.out.println("=============================");
+                    for(String post : posts) {
+                        System.out.println(post);
+                    }
+                    System.out.println("=============================");
+                    System.out.print("Choose a post number to view : ");
+                    int postNumber = (new Scanner(System.in)).nextInt();
+
+                    String post;
+                    if((post = customer.getPost(postNumber)) != null) {
+                        System.out.println("=============================");
+                        System.out.println(post);
+                        System.out.println("=============================");
+                        try {System.in.read();} catch (Exception e) {;}
+                    } else {
+                        System.out.print("No such post exist.");
+                    }
+
+                    break;
+                }
+                case 3: {
+                    String[] coupons = customer.getCouponList();
+
+                    System.out.println("=============================");
+                    for(String coupon : coupons) {
+                        System.out.println(coupon);
+                    }
+                    System.out.println("=============================");
+
+                    break;
+                }
+                case 4: {
+                    mainLoop = false;
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
     }
 
-    private static int printMainMenu() {
-        return 0;
+    public static int door() {
+        System.out.println("");
+        System.out.println("Handong Cafe Manager");
+        System.out.println("=============================");
+        System.out.println("1. Login");
+        System.out.println("2. Register");
+        System.out.println("=============================");
+        System.out.print("Choose a menu : ");
+
+        return (new Scanner(System.in)).nextInt();
     }
 
-    private static Connection initDatabase(String addr, String id, String password) {
+    public static int printMainMenu() {
+        System.out.println("");
+        System.out.println("=============================");
+        System.out.println("1. Select a cafe");
+        System.out.println("2. View all events");
+        System.out.println("3. View Stamp Coupons");
+        System.out.println("4. Quit");
+        System.out.println("=============================");
+        System.out.print("Choose a menu : ");
+
+        return (new Scanner(System.in)).nextInt();
+    }
+
+    public static int printCafeMenu() {
+        System.out.println("=============================");
+        System.out.println("1. View all menu");
+        System.out.println("2. View beverage menu");
+        System.out.println("3. View beverage menu by temperature");
+        System.out.println("4. View ingredients");
+        System.out.println("5. View menu with filtering ingredient");
+        System.out.println("6. Exit cafe menu");
+        System.out.println("=============================");
+        System.out.print("Choose a menu : ");
+
+        return (new Scanner(System.in)).nextInt();
+    }
+
+    public static Connection initDatabase(String addr, String id, String password) {
         Connection conn = null;
 
         try {
@@ -43,23 +213,24 @@ public class Main {
         return conn;
     }
 
-    public String register() {
-        System.out.println("Input ID : ");
+    public static String register() {
+        System.out.print("");
+        System.out.print("Input ID : ");
         String ID = (new Scanner(System.in)).nextLine();
-        System.out.println("Input Password : ");
+        System.out.print("Input Password : ");
         String password = (new Scanner(System.in)).nextLine();
-        System.out.println("Name : ");
+        System.out.print("Name : ");
         String name = (new Scanner(System.in)).nextLine();
-        System.out.println("Birthday(YYYY-MM-DD) : ");
+        System.out.print("Birthday(YYYY-MM-DD) : ");
         String birthday = (new Scanner(System.in)).nextLine();
-        System.out.println("Gender(M or F) : ");
+        System.out.print("Gender(M or F) : ");
         String gender = (new Scanner(System.in)).nextLine();
 
         String query = "INSERT INTO USERS (ID, PASSWORD, UNAME, BIRTH, SEX, TYPE) VALUES (?, ?, ?, ?, ?, ?)";
 
         PreparedStatement pstmt;
         try {
-            pstmt = this.conn.prepareStatement(query);
+            pstmt = conn.prepareStatement(query);
             pstmt.setString(1, ID);
             pstmt.setString(2, password);
             pstmt.setString(3, name);
@@ -79,17 +250,18 @@ public class Main {
         return ID;
     }
 
-    public String login() {
-        System.out.println("Input ID : ");
+    public static String login() {
+        System.out.print("");
+        System.out.print("Input ID : ");
         String ID = (new Scanner(System.in)).nextLine();
-        System.out.println("Input Password : ");
+        System.out.print("Input Password : ");
         String password = (new Scanner(System.in)).nextLine();
 
         String query = "SELECT * FROM USERS WHERE ID=? AND PASSWORD=?";
 
         PreparedStatement pstmt = null;
         try {
-            pstmt = this.conn.prepareStatement(query);
+            pstmt = conn.prepareStatement(query);
             pstmt.setString(1, ID);
             pstmt.setString(2, password);
 
@@ -97,12 +269,14 @@ public class Main {
 
             if(rs.next()) {
                 pstmt.close();
-                return rs.getString("ID");
+
+                return ID;
             } else {
                 System.out.println("There is no such user.");
             }
             pstmt.close();
-        } catch(Exception e) {
+        } catch(SQLException e) {
+            System.out.println(e);
             System.out.println("Fail to login.");
         }
 

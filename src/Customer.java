@@ -1,6 +1,7 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 /**
@@ -16,7 +17,7 @@ public class Customer {
         this.conn = conn;
     }
 
-    public String[] getPostList() {
+    public String[] getPostTitleList() {
         String[] posts = null;
 
         String query = "SELECT * FROM POST ORDER BY POST_DATE ASC";
@@ -28,10 +29,10 @@ public class Customer {
             ResultSet rs = pstmt.executeQuery();
 
             int i = 0;
-            posts = new String[rs.getRow()];
+            posts = new String[getRowFromRS(rs)];
             while(rs.next()) {
-                posts[i++] = rs.getString("TITLE") + " (" + rs.getString("CAFE") + ")" + "\n" +
-                        rs.getString("CONTENT") + " / " + rs.getString("POST_DATE");
+                posts[i++] = rs.getInt("POST_ID") + ". " + rs.getString("TITLE") + " (" +
+                            rs.getString("CAFE") + ")" + " - " + rs.getString("POST_DATE");
             }
 
             pstmt.close();
@@ -40,6 +41,31 @@ public class Customer {
         }
 
         return posts;
+    }
+
+    public String getPost(int postNumber) {
+        String post = null;
+
+        String query = "SELECT * FROM POST WHERE POST_ID=?";
+
+        PreparedStatement pstmt;
+        try {
+            pstmt = this.conn.prepareStatement(query);
+            pstmt.setInt(1, postNumber);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            if(rs.next()) {
+                post = rs.getString("TITLE") + " (" + rs.getString("CAFE") + ")" + " - " +
+                        "\n" + rs.getString("CONTENT") + " / " + rs.getString("POST_DATE");
+            }
+
+            pstmt.close();
+        } catch(Exception e) {
+            System.out.println("Fail to get post list.");
+        }
+
+        return post;
     }
 
     public String[] getCafeList() {
@@ -54,14 +80,15 @@ public class Customer {
             ResultSet rs = pstmt.executeQuery();
 
             int i = 0;
-            cafes = new String[rs.getRow()];
+            cafes = new String[getRowFromRS(rs)];
             while(rs.next()) {
                 cafes[i++] = rs.getString("CNAME") + " - " + rs.getString("LOCATION") +
                         "(" + rs.getString("PHONE") + ")";
             }
 
             pstmt.close();
-        } catch(Exception e) {
+        } catch(SQLException e) {
+            System.out.println(e);
             System.out.println("Fail to get cafe list.");
         }
 
@@ -81,7 +108,7 @@ public class Customer {
             ResultSet rs = pstmt.executeQuery();
 
             int i = 0;
-            coupons = new String[rs.getRow()];
+            coupons = new String[getRowFromRS(rs)];
             while(rs.next()) {
                 coupons[i++] = rs.getString("CAFE") + " - " + rs.getInt("CNUMBER");
             }
@@ -107,7 +134,7 @@ public class Customer {
             ResultSet rs = pstmt.executeQuery();
 
             int i = 0;
-            menu = new String[rs.getRow()];
+            menu = new String[getRowFromRS(rs)];
             while(rs.next()) {
                 menu[i++] = rs.getString("MNAME") + " (" + rs.getString("SORT") + ", " +
                         rs.getInt("CALORIE") + " kcal) - " + rs.getInt("PRICE") + " won" +
@@ -138,7 +165,7 @@ public class Customer {
             ResultSet rs = pstmt.executeQuery();
 
             int i = 0;
-            beverages = new String[rs.getRow()];
+            beverages = new String[getRowFromRS(rs)];
             while(rs.next()) {
                 beverages[i++] = rs.getString("MNAME") + " (" + rs.getString("SORT") + ", " +
                         rs.getInt("CALORIE") + " kcal" + ", " + rs.getString("TEMPERATURE") +
@@ -159,18 +186,18 @@ public class Customer {
 
         String query = "SELECT MENUS.*, BEVERAGES.* FROM MENUS " +
                         "INNER JOIN BEVERAGES ON MENUS.MENUID= BEVERAGES.MENU " +
-                        "WHERE MENUS.SORT!=? AND BEVERAGES.TEMPERATURE=? ORDER BY MENUS.PRICE ASC";
+                        "WHERE MENUS.CAFE=? AND BEVERAGES.TEMPERATURE=? ORDER BY MENUS.PRICE ASC";
 
         PreparedStatement pstmt;
         try {
             pstmt = this.conn.prepareStatement(query);
-            pstmt.setString(1, "Dessert");
+            pstmt.setString(1, this.cafe);
             pstmt.setString(2, temp);
 
             ResultSet rs = pstmt.executeQuery();
 
             int i = 0;
-            beverages = new String[rs.getRow()];
+            beverages = new String[getRowFromRS(rs)];
             while(rs.next()) {
                 beverages[i++] = rs.getString("MNAME") + " (" + rs.getString("SORT") + ", " +
                         rs.getInt("CALORIE") + " kcal" + ", " + rs.getString("SIZE") +") - " +
@@ -200,7 +227,7 @@ public class Customer {
             ResultSet rs = pstmt.executeQuery();
 
             int i = 0;
-            menu = new String[rs.getRow()];
+            menu = new String[getRowFromRS(rs)];
             while(rs.next()) {
                 menu[i++] = rs.getString("MNAME") + " (" + rs.getString("SORT") + ", " +
                         rs.getInt("CALORIE") + " kcal) - " + rs.getInt("PRICE") + " won" +
@@ -219,7 +246,7 @@ public class Customer {
     public String[] getIngredients(String menu) {
         String[] ingredients = null;
 
-        String query = "SELECT * FROM INGREDIENT WHERE MENU=(SELECT MENUID FROM MENU WHERE CAFE=? AND MNAME=?)";
+        String query = "SELECT * FROM INGREDIENT WHERE MENU=(SELECT MENUID FROM MENUS WHERE CAFE=? AND MNAME=?)";
 
         PreparedStatement pstmt;
         try {
@@ -230,7 +257,7 @@ public class Customer {
             ResultSet rs = pstmt.executeQuery();
 
             int i = 0;
-            ingredients = new String[rs.getRow()];
+            ingredients = new String[getRowFromRS(rs)];
             while(rs.next()) {
                 ingredients[i++] = rs.getString("NAME");
             }
@@ -241,5 +268,33 @@ public class Customer {
         }
 
         return ingredients;
+    }
+    
+    private int getRowFromRS(ResultSet rs) {
+        int row = 0;
+        
+        try {
+            rs.last();
+            row = rs.getRow();
+            rs.beforeFirst();
+        } catch (SQLException e) {;}
+        
+        return row;
+    }
+
+    public String getID() {
+        return ID;
+    }
+
+    public void setID(String ID) {
+        this.ID = ID;
+    }
+
+    public String getCafe() {
+        return cafe;
+    }
+
+    public void setCafe(String cafe) {
+        this.cafe = cafe;
     }
 }
