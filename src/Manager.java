@@ -49,6 +49,8 @@ public class Manager {
         String price = (new Scanner(System.in)).nextLine();
         System.out.println("Stock : ");
         String stock = (new Scanner(System.in)).nextLine();
+        System.out.println("Ingredients(Separate with semi-colon) : ");
+        String ingredients = (new Scanner(System.in)).nextLine();
 
         try {
             String query = "INSERT INTO MENUS (CAFE, SORT, MNAME, CALORIE, PRICE, STOCK) VALUES (?, ?, ?, ?, ?, ?)";
@@ -62,6 +64,18 @@ public class Manager {
             pstmt.setString(6, stock);
 
             pstmt.executeUpdate();
+
+            String[] ingredient = ingredients.split(";");
+
+            for(int i = 0; i < ingredient.length; i++) {
+                query = "INSERT INTO INGREDIENT (MENU, NAME) VALUES ((SELECT MENUID FROM MENUS WHERE MNAME=? AND CAFE=?), ?)";
+                pstmt = this.conn.prepareStatement(query);
+
+                pstmt.setString(1, menu);
+                pstmt.setString(2, this.cafe);
+                pstmt.setString(3, ingredient[i].replaceAll(" ", ""));
+                pstmt.executeUpdate();
+            }
 
             pstmt.close();
 
