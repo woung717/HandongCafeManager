@@ -85,9 +85,8 @@ public class Admin {
         System.out.println("Input ID : ");
         String ID = (new Scanner(System.in)).nextLine();
 
-        String query = null;
-
         try {
+            String query = null;
             PreparedStatement pstmt = this.conn.prepareStatement("START TRANSACTION");
             pstmt.execute();
 
@@ -141,7 +140,7 @@ public class Admin {
         return true;
     }
 
-    public String[] showAllCafe() {
+    public String[] getAllCafe() {
         String[] cafes = null;
 
         String query = "SELECT * FROM CAFES";
@@ -167,7 +166,7 @@ public class Admin {
         return cafes;
     }
 
-    public String[] showAllUser() {
+    public String[] getAllUser() {
         String[] users = null;
 
         String query = "SELECT * FROM USERS";

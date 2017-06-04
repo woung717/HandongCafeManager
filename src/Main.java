@@ -12,16 +12,18 @@ public class Main {
     public static void main(String[] args) {
         conn = initDatabase(SERVER_ADDR, DB_ID, DB_PASSWORD);
 
-        Customer customer = new Customer(conn);
-        Admin admin = new Admin(conn);
-
+        String ID = null;
         do {
-            customer.setID((door() == 1) ? login() : register());
-        } while(customer.getID() == null);
+            ID = (door() == 1) ? login() : register();
+        } while(ID == null);
 
         boolean mainLoop = true;
         while(mainLoop) {
-            if(getUserType(customer.getID()).equals("C")) {
+            if(getUserType(ID).equals("C")) {
+                Customer customer = new Customer(conn);
+
+                customer.setID(ID);
+
                 switch (printCustomterMainMenu()) {
                     case 1: {
                         String[] cafes = customer.getCafeList();
@@ -158,12 +160,65 @@ public class Main {
                     default:
                         break;
                 }
-            } else if(getUserType(customer.getID()).equals("M")) {
-                // Manager menu
-            } else if(getUserType(customer.getID()).equals("A")) {
+            } else if(getUserType(ID).equals("M")) {
+                Manager manager = new Manager(conn, ID);
+
+                System.out.println("");
+                System.out.println(manager.getCafe());
+                switch (printManagerMainMenu()) {
+                    case 1: {
+                        manager.addMenu();
+                        break;
+                    }
+                    case 2: {
+                        manager.deleteMenu();
+                        break;
+                    }
+                    case 3: {
+                        String[] menus = manager.getAllMenu();
+
+                        System.out.println("=============================");
+                        for (String menu : menus) {
+                            System.out.println(menu);
+                        }
+                        System.out.println("=============================");
+                        try { System.in.read(); } catch (Exception e) { ; }
+
+                        break;
+                    }
+                    case 4: {
+                        manager.addEvent();
+                        break;
+                    }
+                    case 5: {
+                        manager.makeOrder();
+                        break;
+                    }
+                    case 6: {
+                        String[] menus = manager.getTop3ByMonth();
+
+                        System.out.println("=============================");
+                        for (String menu : menus) {
+                            System.out.println(menu);
+                        }
+                        System.out.println("=============================");
+                        try { System.in.read(); } catch (Exception e) { ; }
+
+                        break;
+                    }
+                    case 7: {
+                        mainLoop = false;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+            } else if(getUserType(ID).equals("A")) {
+                Admin admin = new Admin(conn);
+
                 switch (printAdminMainMenu()) {
                     case 1: {
-                        String[] cafes = admin.showAllCafe();
+                        String[] cafes = admin.getAllCafe();
 
                         System.out.println("=============================");
                         for (String cafe : cafes) {
@@ -175,7 +230,7 @@ public class Main {
                         break;
                     }
                     case 2: {
-                        String[] users = admin.showAllUser();
+                        String[] users = admin.getAllUser();
 
                         System.out.println("=============================");
                         for (String user : users) {
@@ -230,6 +285,21 @@ public class Main {
         System.out.println("4. Remove user");
         System.out.println("5. Set manager on cafe");
         System.out.println("6. Quit");
+        System.out.println("=============================");
+        System.out.print("Choose a menu : ");
+
+        return (new Scanner(System.in)).nextInt();
+    }
+
+    public static int printManagerMainMenu() {
+        System.out.println("=============================");
+        System.out.println("1. Add menu");
+        System.out.println("2. Remove menu");
+        System.out.println("3. Show all menu");
+        System.out.println("4. Add event");
+        System.out.println("5. Make order");
+        System.out.println("6. Monthly Top 3 menu");
+        System.out.println("7. Quit");
         System.out.println("=============================");
         System.out.print("Choose a menu : ");
 
