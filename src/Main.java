@@ -67,7 +67,7 @@ public class Main {
                                     break;
                                 }
                                 case 3: {
-                                    System.out.print("Hot or Cool? (H or C) : ");
+                                    System.out.print("Hot or Cool? (H or C or H/C) : ");
                                     String[] menus = customer.getAllBeverageByTemperature((new Scanner(System.in)).nextLine());
 
                                     System.out.println("=============================");
