@@ -1,3 +1,5 @@
+import com.sun.org.apache.regexp.internal.RE;
+
 import java.sql.*;
 import java.util.Scanner;
 
@@ -161,21 +163,25 @@ public class Manager {
     }
 
     public String[] getTop3ByMonth() {
+        System.out.println("Month(1-12) : ");
+        int month = (new Scanner(System.in)).nextInt();
+
         String[] menus = null;
 
         String query = "SELECT *, COUNT(MENU) FROM ORDERS INNER JOIN MENUS ON MENUS.MENUID=ORDERS.MENU " +
-                        "WHERE CAFE_NAME=? GROUP BY MONTH(ISSUE_TIME) ORDER BY COUNT(MENU) DESC LIMIT 3";
+                        "WHERE CAFE_NAME=? AND MONTH(ISSUE_TIME)=? GROUP BY MENU ORDER BY COUNT(MENU) DESC LIMIT 3";
 
         try {
             PreparedStatement pstmt = this.conn.prepareStatement(query);
 
             pstmt.setString(1, this.cafe);
+            pstmt.setInt(2, month);
             ResultSet rs = pstmt.executeQuery();
 
             int i = 0;
             menus = new String[Customer.getRowFromRS(rs)];
             while(rs.next()) {
-                menus[i] = rs.getString("MNAME") + " - " + rs.getString("COUNT(MENU)");
+                menus[i++] = rs.getString("MNAME") + " - " + rs.getString("COUNT(MENU)");
             }
 
             pstmt.close();
@@ -200,7 +206,15 @@ public class Manager {
             PreparedStatement pstmt = this.conn.prepareStatement("START TRANSACTION");
             pstmt.execute();
 
-            String query = "INSERT INTO ORDERS (CUSTOMER, MENU, CAFE_NAME) VALUES (?, (SELECT MENUID FROM MENUS WHERE MNAME=? AND CAFE=?), ?)";
+            String query = "SELECT STOCK FROM MENUS WHERE MNAME=?";
+
+            pstmt = this.conn.prepareStatement(query);
+            pstmt.setString(1, menu);
+
+            ResultSet rs = pstmt.executeQuery();
+            if(!rs.next() || rs.getInt("STOCK") < 1) throw new SQLException();
+
+            query = "INSERT INTO ORDERS (CUSTOMER, MENU, CAFE_NAME) VALUES (?, (SELECT MENUID FROM MENUS WHERE MNAME=? AND CAFE=?), ?)";
 
             pstmt = this.conn.prepareStatement(query);
             pstmt.setString(1, customer);
@@ -216,7 +230,7 @@ public class Manager {
             pstmt.setString(1, customer);
             pstmt.setString(2, this.cafe);
 
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             if(!rs.next()) {    // if customer doesn't have coupon
                 query = "INSERT INTO COUPON (CUSTOMER, CAFE) VALUES (?, ?)";
 
@@ -277,7 +291,7 @@ public class Manager {
 
             pstmt.close();
         } catch (SQLException e) {
-            System.out.println(e);
+            System.out.println("Not proper order.");
             try {
                 PreparedStatement pstmt = this.conn.prepareStatement("ROLLBACK");
                 pstmt.execute();
