@@ -20,7 +20,7 @@ public class Customer {
     public String[] getPostTitleList() {
         String[] posts = null;
 
-        String query = "SELECT * FROM POST ORDER BY POST_DATE ASC";
+        String query = "SELECT * FROM POST ORDER BY POST_DATE DESC";
 
         PreparedStatement pstmt;
         try {
