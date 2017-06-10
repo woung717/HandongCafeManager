@@ -2,10 +2,10 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
-    static final String SERVER_ADDR = "peace.handong.edu";
-    static final String DB_ID = "db21100380";
-    static final String DB_PASSWORD = "21100380";
-    static final String DB_NAME = "21100380_HyeonUng_Shin";
+    static final String SERVER_ADDR = "";
+    static final String DB_ID = "";
+    static final String DB_PASSWORD = "";
+    static final String DB_NAME = "";
 
     static Connection conn;
 
